@@ -47,9 +47,20 @@ graph TD
 
 ---
 
-## 🛠️ Installation
+## 🤖 Quick Install via Agentic AI
 
-Installing these skills into your Claude Desktop application is straight-forward.
+If you are using an agentic AI assistant in your terminal (like Claude Code, Cursor, or Antigravity), you do not need to install this manually!
+
+Just paste this exact prompt into your AI:
+> *"Please fetch the Master Dev Suite from `https://github.com/Sadiq-Kolakar/Claude_Skills.git` and install all the skill folders directly into my active skills directory. Clean up the cloned repo when you're done."*
+
+The AI will automatically clone the repository, move the 7 skill folders to the correct location, and clean up the temporary files entirely on its own.
+
+---
+
+## 🛠️ Manual Installation (For Claude Desktop App)
+
+Installing these skills into your Claude Desktop application or if you prefer a manual setup is straight-forward.
 
 1. **Locate your Claude Skills Directory**
    Ensure you know where Claude is configured to look for custom skills.
