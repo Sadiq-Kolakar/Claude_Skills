@@ -1,61 +1,83 @@
 ---
 name: master-prompt
 description: >
-  Master orchestrator skill that produces a comprehensive, development-ready Master Prompt Document
-  by invoking five sub-skills as subagents in sequence: PRD → System Design → UI/UX Wireframes →
-  Feature Breakdown → Frontend Design — then synthesising all their outputs into a single master
-  prompt that any AI coding assistant can use to build the entire project.
+  Master entry-point skill that produces a comprehensive, development-ready Master Prompt Document.
+  When invoked, it first calls the master-dev-skill (pipeline orchestrator) which spawns five
+  sub-skills as subagents in sequence: PRD → System Design → UI/UX Wireframes → Feature Breakdown
+  → Frontend Design. Once all five are complete, this skill synthesises their outputs into a single
+  master prompt that any AI coding assistant can use to build the entire project.
+  This skill is the top of the skill hierarchy — all 7 skills are wired together through it.
   Trigger this skill when the user mentions: 'master prompt', 'master prompt document',
-  'project prompt doc', 'AI coding instructions', 'project overview doc', 'full dev spec',
-  'spec out my idea', 'turn my idea into a plan', 'I want to build [X]', 'create a master doc',
-  'make a prompt doc for Claude/GPT/Cursor', 'run the full pipeline', 'I have an idea',
-  'help me spec out', or any phrase indicating they want to go from idea → full product spec
-  → code-ready master prompt. This skill chains all sub-skills together automatically — the user
-  only needs to describe their idea and this skill handles the rest.
+  'project prompt doc', 'AI coding instructions', 'full dev spec', 'spec out my idea',
+  'turn my idea into a plan', 'I want to build [X]', 'create a master doc', 'I have an idea',
+  'help me spec out', 'run the full pipeline', 'make a prompt doc for Claude/GPT/Cursor',
+  or any phrase indicating they want to go from idea → full product spec → code-ready prompt.
 ---
 
-# Master Prompt Skill (Orchestrator)
+# Master Prompt Skill (Entry Point)
 
-This skill is the **master orchestrator**. When invoked, it runs the full development specification pipeline by spawning **five dedicated subagents** — each responsible for one skill — then **synthesises all their outputs** into a single, comprehensive Master Prompt Document.
+This skill is the **top-level entry point** for the entire development specification pipeline. When invoked, it:
 
-## What This Skill Produces
+1. Gathers the user's idea
+2. Calls **master-dev-skill** (the pipeline orchestrator) which spawns 5 subagents
+3. Receives all 5 completed documents
+4. Synthesises everything into the final **Master Prompt Document**
 
-| Step | Sub-Skill Invoked | Output File | Purpose |
-|------|-------------------|-------------|---------|
-| 1 | `prd` | `01_PRD.md` | Product Requirements Document |
-| 2 | `system-design` | `02_SystemDesign.md` | Technical Architecture & System Design |
-| 3 | `uiux-wireframes` | `03_UIUXWireframes.md` | UI/UX Wireframes & User Flows |
-| 4 | `feature-breakdown` | `04_FeatureBreakdown.md` | Granular Feature Breakdown & Task List |
-| 5 | `frontend-design` | `05_FrontendDesign.md` | Production-Grade UI Components & Visual Design |
-| 6 | *(this skill)* | `06_MasterPrompt.md` | Final synthesised Master Prompt |
-
----
-
-## Pipeline Flow
+## Complete Skill Hierarchy
 
 ```
-User's Idea
-    │
-    ▼
-┌──────────┐     ┌────────────────┐     ┌──────────────────┐
-│  Step 1  │────▶│    Step 2       │────▶│     Step 3        │
-│   PRD    │     │ System Design   │     │ UI/UX Wireframes  │
-└──────────┘     └────────────────┘     └──────────────────┘
-                                                │
-    ┌───────────────────────────────────────────┘
-    ▼
-┌──────────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│     Step 4        │────▶│    Step 5        │────▶│     Step 6        │
-│ Feature Breakdown │     │ Frontend Design  │     │  MASTER PROMPT    │
-└──────────────────┘     └─────────────────┘     │  (Synthesis)      │
-                                                  └──────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  master-prompt/SKILL.md  ← YOU ARE HERE (Entry Point)   │
+│                                                          │
+│  Invokes:                                                │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  master-dev-skill/SKILL.md  (Pipeline Orchestrator) │ │
+│  │                                                      │ │
+│  │  Spawns 5 subagents:                                 │ │
+│  │  ┌──────────────────────────────────────────┐        │ │
+│  │  │ Step 1: prd/SKILL.md                     │        │ │
+│  │  │ Step 2: system-design/SKILL.md           │        │ │
+│  │  │ Step 3: uiux-wireframes/SKILL.md         │        │ │
+│  │  │ Step 4: feature-breakdown/SKILL.md       │        │ │
+│  │  │ Step 5: frontend-design/SKILL.md         │        │ │
+│  │  └──────────────────────────────────────────┘        │ │
+│  │                                                      │ │
+│  │  Returns: 5 complete documents                       │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                                                          │
+│  Step 6: Synthesise → 06_MasterPrompt.md                 │
+└─────────────────────────────────────────────────────────┘
 ```
+
+## All 7 Skills and Their Roles
+
+| # | Skill | File | Role |
+|---|-------|------|------|
+| 1 | **master-prompt** | `master-prompt/SKILL.md` | 🎯 Entry point — user calls this |
+| 2 | **master-dev-skill** | `master-dev-skill/SKILL.md` | 🔧 Pipeline orchestrator — manages Steps 1–5 |
+| 3 | **prd** | `prd/SKILL.md` | 📋 Worker — produces PRD |
+| 4 | **system-design** | `system-design/SKILL.md` | 🏗️ Worker — produces System Design |
+| 5 | **uiux-wireframes** | `uiux-wireframes/SKILL.md` | 🎨 Worker — produces UI/UX Wireframes |
+| 6 | **feature-breakdown** | `feature-breakdown/SKILL.md` | 📦 Worker — produces Feature Breakdown |
+| 7 | **frontend-design** | `frontend-design/SKILL.md` | 🖥️ Worker — produces Frontend Design |
+
+## What This Skill Produces (Full Pipeline)
+
+| Step | Handled By | Output File | Purpose |
+|------|-----------|-------------|---------|
+| 0 | master-prompt | *(context)* | Idea intake |
+| 1 | master-dev-skill → prd | `01_PRD.md` | Product Requirements Document |
+| 2 | master-dev-skill → system-design | `02_SystemDesign.md` | Technical Architecture & System Design |
+| 3 | master-dev-skill → uiux-wireframes | `03_UIUXWireframes.md` | UI/UX Wireframes & User Flows |
+| 4 | master-dev-skill → feature-breakdown | `04_FeatureBreakdown.md` | Granular Feature Breakdown & Task List |
+| 5 | master-dev-skill → frontend-design | `05_FrontendDesign.md` | Production-Grade UI Components |
+| 6 | master-prompt | `06_MasterPrompt.md` | Final synthesised Master Prompt |
 
 ---
 
 ## Step 0 — Idea Intake
 
-Before spawning any subagents, gather the following from the user in a **single conversational message** (don't bombard with separate questions):
+Before invoking the pipeline, gather the following from the user in a **single conversational message** (don't bombard with separate questions):
 
 1. **What is the core idea?** (1–3 sentences)
 2. **Who is the target user?**
@@ -65,217 +87,63 @@ Before spawning any subagents, gather the following from the user in a **single 
 
 If the user has already provided this context in their initial message, extract it and **confirm** before proceeding. Do not ask for info already given.
 
-Once confirmed, compile a **Shared Context Block** — a concise summary of the idea, users, platform, stack, and scope. Every subagent below receives this block verbatim.
+Once confirmed, compile a **Shared Context Block** — a concise summary of the idea, users, platform, stack, and scope. This block is passed to master-dev-skill.
 
 ---
 
-## Step 1 — Invoke Subagent: PRD
+## Step 1 — Invoke master-dev-skill (Pipeline Orchestrator)
 
-**Read the PRD skill file and spawn a dedicated subagent for it.**
+**This is the key wiring step.** Read the master-dev-skill skill file and invoke it as a subagent.
 
 **Skill file to read:**
 ```
-prd/SKILL.md
+master-dev-skill/SKILL.md
 ```
 
 **Subagent instructions:**
 ```
-You are the PRD Subagent.
+You are the Pipeline Orchestrator Subagent (master-dev-skill).
 
 SHARED CONTEXT:
 {shared_context_block}
 
 Your task:
-1. Read the PRD skill file (prd/SKILL.md). Follow its instructions exactly.
-   If the file does not exist, use built-in knowledge of PRD best practices.
-2. IMPORTANT: Skip the interview step — all context is provided above.
-   Extract project details from the Shared Context instead of asking the user.
-3. Produce a complete Product Requirements Document containing:
-   - Problem Statement (what problem, why now, current pain points)
-   - Target Users (primary, secondary, out-of-scope)
-   - Feature List (MVP/basic features, advanced/future features, out of scope)
-   - User Flow (step-by-step journey from user arrives → goal achieved)
-   - Tech Preferences (if specified in context)
-4. Save the output to `01_PRD.md`.
-5. Return the FULL PRD content so the orchestrator can pass it downstream.
+1. Read the master-dev-skill skill file (master-dev-skill/SKILL.md). Follow its instructions exactly.
+2. The Shared Context above contains the user's idea — skip the Idea Intake step (Step 0).
+3. Execute the FULL pipeline — Steps 1 through 5:
+   - Step 1: Spawn a PRD subagent (reads prd/SKILL.md) → produce 01_PRD.md
+   - Step 2: Spawn a System Design subagent (reads system-design/SKILL.md) → produce 02_SystemDesign.md
+   - Step 3: Spawn a UI/UX Wireframes subagent (reads uiux-wireframes/SKILL.md) → produce 03_UIUXWireframes.md
+   - Step 4: Spawn a Feature Breakdown subagent (reads feature-breakdown/SKILL.md) → produce 04_FeatureBreakdown.md
+   - Step 5: Spawn a Frontend Design subagent (reads frontend-design/SKILL.md) → produce 05_FrontendDesign.md
+4. Pass all outputs downstream between steps (PRD feeds System Design, etc.)
+5. Return ALL 5 complete document outputs so I can synthesise the Master Prompt.
 ```
 
-**Wait for this subagent to complete and capture its full output before proceeding.**
-The PRD output feeds into ALL subsequent subagents.
+**Wait for master-dev-skill to complete and return all 5 outputs.**
+
+Announce to user:
+- "🔄 Invoking master-dev-skill pipeline orchestrator..."
+- "📋 Pipeline is running: PRD → System Design → UI/UX → Features → Frontend..."
+
+On completion:
+- "✅ Pipeline complete — all 5 documents generated. Now synthesising Master Prompt..."
 
 ---
 
-## Step 2 — Invoke Subagent: System Design
+## Step 2 — Synthesise the Master Prompt (This Skill's Core Job)
 
-**Read the System Design skill file and spawn a dedicated subagent for it.**
-
-**Skill file to read:**
-```
-system-design/SKILL.md
-```
-
-**Subagent instructions:**
-```
-You are the System Design Subagent.
-
-SHARED CONTEXT:
-{shared_context_block}
-
-PRD OUTPUT (from Step 1):
-{prd_output}
-
-Your task:
-1. Read the System Design skill file (system-design/SKILL.md). Follow its instructions exactly.
-   If the file does not exist, use built-in knowledge.
-2. IMPORTANT: Skip the context gathering step — use the PRD output and Shared Context above.
-3. Using the PRD above, produce a complete System Design Document covering:
-   - Frontend + Backend Architecture (with architecture diagram)
-   - API Structure and Flow (endpoints table, request/response flow)
-   - Database Schema (entity tables, indexing strategy)
-   - Authentication and Security Flow (auth strategy, registration/login flows, security checklist)
-4. Save the output to `02_SystemDesign.md`.
-5. Return the FULL system design content.
-```
-
-**Wait for completion. Capture output.**
-
----
-
-## Step 3 — Invoke Subagent: UI/UX Wireframes
-
-**Read the UI/UX Wireframes skill file and spawn a dedicated subagent for it.**
-
-**Skill file to read:**
-```
-uiux-wireframes/SKILL.md
-```
-
-**Subagent instructions:**
-```
-You are the UI/UX Wireframes Subagent.
-
-SHARED CONTEXT:
-{shared_context_block}
-
-PRD OUTPUT (from Step 1):
-{prd_output}
-
-SYSTEM DESIGN OUTPUT (from Step 2):
-{system_design_output}
-
-Your task:
-1. Read the UI/UX Wireframes skill file (uiux-wireframes/SKILL.md). Follow its instructions exactly.
-   If the file does not exist, use built-in knowledge.
-2. Using the PRD and System Design above, produce a complete UI/UX document containing:
-   - Page-by-page wireframe layouts (header, main sections, footer)
-   - Navigation hierarchy and structure
-   - User interaction flow (how users move through the interface)
-   - Responsive behaviour (desktop, tablet, mobile layouts)
-   - Component suggestions (buttons, cards, forms, modals, etc.)
-   - UX best practices applied to this specific product
-3. Save the output to `03_UIUXWireframes.md`.
-4. Return the FULL wireframes content.
-```
-
-**Wait for completion. Capture output.**
-
----
-
-## Step 4 — Invoke Subagent: Feature Breakdown
-
-**Read the Feature Breakdown skill file and spawn a dedicated subagent for it.**
-
-**Skill file to read:**
-```
-feature-breakdown/SKILL.md
-```
-
-**Subagent instructions:**
-```
-You are the Feature Breakdown Subagent.
-
-SHARED CONTEXT:
-{shared_context_block}
-
-PRD OUTPUT (from Step 1):
-{prd_output}
-
-SYSTEM DESIGN OUTPUT (from Step 2):
-{system_design_output}
-
-Your task:
-1. Read the Feature Breakdown skill file (feature-breakdown/SKILL.md). Follow its instructions exactly.
-   If the file does not exist, use built-in knowledge.
-2. Decompose the product into a granular feature breakdown containing:
-   - Feature tree (top-level features → sub-features)
-   - Description, implementation notes, and acceptance criteria per sub-feature
-   - Feature overview table (Feature | Sub-features count | Priority | Status)
-   - Dependencies between features
-3. Save the output to `04_FeatureBreakdown.md`.
-4. Return the FULL feature breakdown content.
-```
-
-**Wait for completion. Capture output.**
-
----
-
-## Step 5 — Invoke Subagent: Frontend Design
-
-**Read the Frontend Design skill file and spawn a dedicated subagent for it.**
-
-**Skill file to read:**
-```
-frontend-design/SKILL.md
-```
-
-**Subagent instructions:**
-```
-You are the Frontend Design Subagent.
-
-SHARED CONTEXT:
-{shared_context_block}
-
-PRD OUTPUT (from Step 1):
-{prd_output}
-
-UI/UX WIREFRAMES OUTPUT (from Step 3):
-{uiux_output}
-
-FEATURE BREAKDOWN OUTPUT (from Step 4):
-{feature_breakdown_output}
-
-Your task:
-1. Read the Frontend Design skill file (frontend-design/SKILL.md). Follow its instructions exactly.
-   If the file does not exist, use built-in knowledge of production-grade frontend design.
-2. Using the PRD, wireframes, and feature breakdown above, produce a complete Frontend Design document:
-   - Design system foundations (color palette, typography scale, spacing tokens, component tokens)
-   - Key UI components with detailed specs (buttons, inputs, cards, nav, modals, tables)
-   - Page-level layout breakdowns for each major screen identified in the wireframes
-   - Responsive behaviour notes (mobile / tablet / desktop)
-   - Accessibility requirements (ARIA roles, contrast ratios, keyboard nav)
-   - Animation & micro-interaction guidelines
-   - Code snippets or pseudocode for the most complex components
-3. Save the output to `05_FrontendDesign.md`.
-4. Return the FULL frontend design content.
-```
-
-**Wait for completion. Capture output.**
-
----
-
-## Step 6 — Synthesise the Master Prompt (This Skill's Core Job)
-
-Now that all 5 subagents have completed, **you** (the orchestrator) synthesise everything into the final Master Prompt.
+Now that master-dev-skill has returned all 5 outputs, **you** (master-prompt) synthesise everything into the final Master Prompt.
 
 ### Inputs Available
 
-You now have all of these:
+You now have all of these from the pipeline:
 - `{shared_context_block}` — the original idea and constraints
-- `{prd_output}` — full PRD from Step 1
-- `{system_design_output}` — full System Design from Step 2
-- `{uiux_output}` — full UI/UX Wireframes from Step 3
-- `{feature_breakdown_output}` — full Feature Breakdown from Step 4
-- `{frontend_design_output}` — full Frontend Design from Step 5
+- `{prd_output}` — full PRD from pipeline Step 1
+- `{system_design_output}` — full System Design from pipeline Step 2
+- `{uiux_output}` — full UI/UX Wireframes from pipeline Step 3
+- `{feature_breakdown_output}` — full Feature Breakdown from pipeline Step 4
+- `{frontend_design_output}` — full Frontend Design from pipeline Step 5
 
 ### Master Prompt Document Structure
 
@@ -349,37 +217,31 @@ Produce `06_MasterPrompt.md` with this structure:
 - **Be comprehensive**: Include enough detail that someone can start coding without any other document
 - **Be actionable**: End with clear "start here" instructions
 - **Incorporate everything**: Don't skip outputs from any subagent — weave them all in
-- **Resolve conflicts**: If subagent outputs conflict, prefer System Design for technical decisions, PRD for scope decisions
+- **Resolve conflicts**: If outputs conflict, prefer System Design for technical decisions, PRD for scope decisions
 - **No placeholders**: Replace all `REPLACE_ME` or template text with actual project-specific content
 
 ---
 
 ## Output & Delivery
 
-After all 6 steps are complete:
+After Step 2 (synthesis) is complete, present ALL 6 files to the user:
 
-1. **Present all 6 files** to the user:
-   - `01_PRD.md`
-   - `02_SystemDesign.md`
-   - `03_UIUXWireframes.md`
-   - `04_FeatureBreakdown.md`
-   - `05_FrontendDesign.md`
-   - `06_MasterPrompt.md`
+### Files Produced
 
-2. **Summary table**:
+| # | Document | Produced By | Status |
+|---|----------|------------|--------|
+| 1 | `01_PRD.md` | prd (via master-dev-skill) | ✅ Complete |
+| 2 | `02_SystemDesign.md` | system-design (via master-dev-skill) | ✅ Complete |
+| 3 | `03_UIUXWireframes.md` | uiux-wireframes (via master-dev-skill) | ✅ Complete |
+| 4 | `04_FeatureBreakdown.md` | feature-breakdown (via master-dev-skill) | ✅ Complete |
+| 5 | `05_FrontendDesign.md` | frontend-design (via master-dev-skill) | ✅ Complete |
+| 6 | `06_MasterPrompt.md` | **master-prompt (this skill)** | ✅ Complete |
 
-| # | Document | Status |
-|---|----------|--------|
-| 1 | PRD | ✅ Complete |
-| 2 | System Design | ✅ Complete |
-| 3 | UI/UX Wireframes | ✅ Complete |
-| 4 | Feature Breakdown | ✅ Complete |
-| 5 | Frontend Design | ✅ Complete |
-| 6 | Master Prompt | ✅ Complete |
-
-3. **How to Use** (share with user):
+### How to Use (share with user)
 
 > ### 🚀 How to Use Your Master Dev Package
+>
+> You now have 6 files produced by all 7 skills working together:
 >
 > | File | Use It To... |
 > |------|-------------|
@@ -394,12 +256,39 @@ After all 6 steps are complete:
 > 1. Review `01_PRD.md` and confirm scope is right
 > 2. Paste `06_MasterPrompt.md` into **Claude Code** to start scaffolding
 > 3. Use `04_FeatureBreakdown.md` to create your first sprint
+> 4. Use `05_FrontendDesign.md` as your living design system reference
+>
+> **Skill hierarchy that produced this:**
+> ```
+> master-prompt (entry point)
+>   └── master-dev-skill (pipeline orchestrator)
+>         ├── prd
+>         ├── system-design
+>         ├── uiux-wireframes
+>         ├── feature-breakdown
+>         └── frontend-design
+> ```
 
 ---
 
-## Standalone Mode (Fallback)
+## Fallback: Direct Pipeline Mode
 
-If for some reason the sub-skill files are NOT available (files not found at their paths), this skill falls back to standalone mode:
+If `master-dev-skill/SKILL.md` is NOT available (file not found), this skill falls back to invoking each sub-skill directly:
+
+1. Invoke `prd/SKILL.md` as subagent → capture output
+2. Invoke `system-design/SKILL.md` as subagent → capture output
+3. Invoke `uiux-wireframes/SKILL.md` as subagent → capture output
+4. Invoke `feature-breakdown/SKILL.md` as subagent → capture output
+5. Invoke `frontend-design/SKILL.md` as subagent → capture output
+6. Synthesise all outputs into `06_MasterPrompt.md`
+
+This ensures the skill works even if master-dev-skill is missing — it just handles the orchestration itself.
+
+---
+
+## Fallback: Standalone Mode
+
+If NONE of the sub-skill files are available:
 
 1. Run a short interview to gather: project name, description, platform, tech stack, strict rules, code style, folder structure
 2. Generate the Master Prompt Document directly with these 5 sections:
@@ -417,42 +306,38 @@ If for some reason the sub-skill files are NOT available (files not found at the
 ## Notes for Claude (Orchestrator Behaviour)
 
 ### Execution Model
-- You are the **orchestrator**. You spawn dedicated subagents — you do NOT produce Steps 1–5 yourself.
-- Each subagent is a **focused instance** with a single responsibility. Give it its skill file path, the shared context, and all relevant prior outputs.
-- Steps 1–5 are **strictly sequential** — each feeds into the next. Do NOT spawn Step 2 until Step 1 returns.
-- Step 6 (synthesis) is done by YOU, the orchestrator, after all subagents complete.
+- You are the **entry point**. The user talks to you.
+- You invoke `master-dev-skill` as a subagent to run Steps 1–5.
+- You do NOT produce Steps 1–5 yourself — that's master-dev-skill's job.
+- You handle Step 0 (idea intake) and Step 6 (synthesis) yourself.
 
 ### Context Passing
-- After each subagent completes, capture its **full document output** and store it.
-- Inject prior outputs into the next subagent's instructions using the `{placeholder}` slots shown above.
-- **Do NOT summarise or truncate** prior outputs — subagents need full fidelity.
+- Pass the Shared Context Block to master-dev-skill.
+- master-dev-skill passes it downstream to each sub-skill subagent.
+- master-dev-skill returns all 5 outputs back to you.
+- You use all 5 outputs to synthesise the Master Prompt.
+- **Do NOT summarise or truncate** any outputs — full fidelity is required.
 
 ### Skill File Resolution
-- Each subagent must attempt to read its skill file first.
-- Skill file paths (relative to skills root):
-  - `prd/SKILL.md`
-  - `system-design/SKILL.md`
-  - `uiux-wireframes/SKILL.md`
-  - `feature-breakdown/SKILL.md`
-  - `frontend-design/SKILL.md`
-- If a file doesn't exist, the subagent falls back to built-in knowledge and notes it.
+All skill files are in sibling folders relative to this skill:
+- `master-dev-skill/SKILL.md` — Pipeline Orchestrator
+- `prd/SKILL.md` — PRD Worker
+- `system-design/SKILL.md` — System Design Worker
+- `uiux-wireframes/SKILL.md` — UI/UX Wireframes Worker
+- `feature-breakdown/SKILL.md` — Feature Breakdown Worker
+- `frontend-design/SKILL.md` — Frontend Design Worker
 
 ### Progress Updates
-- Announce to the user when each subagent starts and completes:
-  - "🔄 Spawning PRD subagent..."
-  - "✅ PRD complete — spawning System Design subagent..."
-  - "✅ System Design complete — spawning UI/UX Wireframes subagent..."
-  - etc.
-- Do NOT ask the user for approval between steps — run end-to-end.
+Announce to the user at each stage:
+- "🔄 Gathering your idea..."
+- "🔄 Invoking master-dev-skill pipeline orchestrator..."
+- "📋 Pipeline running: PRD → System Design → UI/UX → Features → Frontend..."
+- "✅ Pipeline complete — all 5 documents generated."
+- "🔄 Synthesising Master Prompt from all outputs..."
+- "✅ Master Prompt complete! Here are your 6 documents."
 
 ### Error Handling
-- If a subagent fails or returns incomplete output, **retry once** with clarified instructions.
-- If it fails again, note the gap and continue with remaining steps.
-- If the user wants to **skip a step**, skip it and note it in the final summary.
-- If context from a prior step is ambiguous, make reasonable assumptions and flag them.
-
-### Output Standards
-- All documents use **Markdown** with clear headings.
-- Content must be **concrete and specific** to the user's actual idea — never generic templates.
-- Each document must be **self-contained** so the user can share it independently.
-- The final `06_MasterPrompt.md` is the crown jewel — it must be comprehensive enough to start coding from.
+- If master-dev-skill fails, fall back to Direct Pipeline Mode (invoke each skill individually).
+- If a sub-skill fails, retry once, then skip and note the gap.
+- If the user wants to skip a step, skip it and note it.
+- Do NOT ask the user for approval between steps — run end-to-end.
